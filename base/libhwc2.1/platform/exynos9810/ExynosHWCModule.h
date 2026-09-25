@@ -30,6 +30,8 @@
 #define BRIGHTNESS_NODE_BASE "/sys/class/backlight/panel/brightness"
 #define MAX_BRIGHTNESS_NODE_BASE "/sys/class/backlight/panel/max_brightness"
 #define USES_SET_DISPLAY_MODE_IOCTL
+/* Panel always starts in WQHD; apply the saved resolution at HWC init */
+#define USES_EARLY_BOOT_DISPLAY_CONFIG
 
 #define WAIT_FENCE  1
 
