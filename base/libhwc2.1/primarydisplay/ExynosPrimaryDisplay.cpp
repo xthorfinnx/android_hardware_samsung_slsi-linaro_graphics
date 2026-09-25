@@ -152,6 +152,24 @@ int32_t ExynosPrimaryDisplay::choosePreferredConfig()
     hwc2_config_t config;
     int32_t bootConfig;
     int32_t err = getPreferredDisplayConfigInternal(&bootConfig);
+#ifdef USES_EARLY_BOOT_DISPLAY_CONFIG
+    if (err == HWC2_ERROR_NONE && property_get_bool("sys.boot_completed", false) == false) {
+        /*
+         * Early boot: apply the saved resolution before SurfaceFlinger reads
+         * the active config, so the boot animation starts in the final mode
+         * instead of being restarted by a later mode switch (hotplug).
+         * The display is still off, where setActiveConfig() would only record
+         * a pending config, so program the DPU directly.
+         */
+        config = static_cast<hwc2_config_t>(bootConfig);
+        if (config != mActiveConfig) {
+            if ((err = ExynosDisplay::setActiveConfigInternal(config)) < 0)
+                ALOGE("failed to set boot config, err %d", err);
+            ALOGI("Preferred mode id: %d (early)", config);
+        }
+        return err;
+    }
+#endif
     if (err == HWC2_ERROR_NONE && property_get_bool("sys.boot_completed", false) == true) {
         config = static_cast<hwc2_config_t>(bootConfig);
 
